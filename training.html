@@ -66,6 +66,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .stab.lower .st-name{color:var(--lower)}
 .stab.upper.active{border-bottom-color:var(--upper)}
 .stab.lower.active{border-bottom-color:var(--lower)}
+.stab.weight .st-name{color:#f04aff}
+.stab.weight.active{border-bottom-color:#f04aff}
 
 /* CONTENT */
 .content{padding:14px 12px 100px;max-width:580px;margin:0 auto;background:var(--bg)}
@@ -193,6 +195,30 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .fade-in{animation:fadeIn .2s ease}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* Graph */
+.graph-box{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:12px;margin:12px 0}
+.graph-canvas{width:100%;height:140px}
+.graph-title{font-family:'Bebas Neue',sans-serif;font-size:14px;margin-bottom:8px}
+.graph-empty{font-family:'DM Mono',monospace;font-size:10px;color:var(--faint);text-align:center;padding:20px}
+.graph-btn{background:var(--s3);border:1px solid var(--b2);border-radius:var(--radius);color:var(--dim);font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;padding:6px 10px;cursor:pointer;transition:all .15s}
+.graph-btn:hover{background:var(--s2);color:var(--text)}
+
+/* Weight Tab */
+.weight-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.weight-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.weight-current{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:#f04aff}
+.weight-trend{font-family:'DM Mono',monospace;font-size:10px;margin-left:8px}
+.weight-trend.up{color:#4af09a}
+.weight-trend.down{color:#f04a4a}
+.weight-input-row{display:flex;gap:8px;align-items:center}
+.weight-input{background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--text);font-family:'DM Mono',monospace;font-size:18px;padding:10px 12px;width:100px;text-align:center;outline:none;-webkit-appearance:none}
+.weight-input:focus{border-color:#f04aff}
+.weight-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--faint);flex:1;text-align:right}
+.weight-history-list{display:flex;flex-direction:column;gap:6px;margin-top:14px;padding-top:14px;border-top:1px solid var(--b1)}
+.weight-history-item{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px}
+.weight-history-item .date{color:var(--faint)}
+.weight-history-item .val{color:var(--text)}
 </style>
 </head>
 <body>
@@ -242,6 +268,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <div class="st-day">Day 4</div>
     <div class="st-name">Lower B</div>
   </div>
+  <div class="stab weight" data-sid="weight" onclick="setSession('weight')">
+    <div class="st-day">Track</div>
+    <div class="st-name">Weight</div>
+  </div>
 </div>
 
 <div class="content fade-in" id="content"></div>
@@ -253,6 +283,16 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="btn-close" onclick="closeHistory()">✕</div>
     </div>
     <div class="modal-body" id="histBody"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="graphModal" onclick="closeGraphBg(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="graphTitle">Lift Progress</div>
+      <div class="btn-close" onclick="closeGraph()">✕</div>
+    </div>
+    <div class="modal-body" id="graphBody"></div>
   </div>
 </div>
 
@@ -469,6 +509,11 @@ const SESSIONS_BASE = {
           3:{scheme:'4×12–15', rpe:'RPE 7', sets:4, note:'Maintain'},
         }},
     ]
+  },
+  weight: {
+    name: 'Weight Tracking',
+    type: 'weight', label: 'Weight',
+    exercises: [{id:'bodyWeight', name:'Body Weight', type:'primary', rest:'-'}]
   }
 };
 
@@ -494,6 +539,7 @@ let curSession = 'upperA';
 let logState = {};    // {`${phase}-${week}-${sid}-${exId}`: {sets:[...]}}
 let history = [];
 let openCards = {};
+let weightLog = [];    // [{date, weight}]
 
 function ls(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch{return fb}}
 function ss(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
@@ -504,6 +550,7 @@ function load(){
   curPhase = ls('prog12_phase',1);
   curWeek  = ls('prog12_week',1);
   curSession = ls('prog12_session','upperA');
+  weightLog = ls('prog12_weight',[]);
 }
 function save(){
   ss('prog12_log',logState);
@@ -511,6 +558,7 @@ function save(){
   ss('prog12_phase',curPhase);
   ss('prog12_week',curWeek);
   ss('prog12_session',curSession);
+  ss('prog12_weight',weightLog);
 }
 
 function stateKey(phase,week,sid,exId){return `${phase}-${week}-${sid}-${exId}`}
@@ -549,11 +597,63 @@ function renderSessionTabs(){
   document.querySelectorAll('.stab').forEach(t=>{
     const sid=t.dataset.sid;
     const sdata=SESSIONS_BASE[sid];
-    t.className=`stab ${sdata.type}${sid===curSession?' active':''}`;
+    const type = sid === 'weight' ? 'weight' : sdata.type;
+    t.className=`stab ${type}${sid===curSession?' active':''}`;
   });
 }
 
 function renderContent(){
+  // Handle weight tab separately
+  if(curSession === 'weight'){
+    const today = new Date().toISOString().split('T')[0];
+    const lastEntry = weightLog[0];
+    const lastWeight = lastEntry ? lastEntry.weight : '';
+    const trend = getWeightTrend();
+    const recent = weightLog.slice(0,10);
+
+    let html = `<div class="weight-session">`;
+    html += `<div class="phase-banner p2">
+      <div class="pb-label">Body Weight Tracking</div>
+      <div class="pb-title">Track Your Weight</div>
+      <div class="pb-desc">Log your body weight to monitor progress over time</div>
+    </div>`;
+
+    html += `<div class="weight-card">
+      <div class="weight-header">
+        <div>
+          <div class="weight-current">${lastWeight ? lastWeight + ' kg' : '— kg'}</div>
+          ${trend}
+        </div>
+      </div>
+      <div class="weight-input-row">
+        <input class="weight-input" type="number" inputmode="decimal" placeholder="00.0" value="${lastWeight}" onchange="saveWeight(this.value)">
+        <div class="weight-date">${lastEntry ? new Date(lastEntry.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : 'Today'}</div>
+      </div>
+    </div>`;
+
+    // Weight graph
+    html += `<div class="graph-box">
+      <div class="graph-title">Weight Over Time</div>
+      ${renderWeightGraph()}
+    </div>`;
+
+    // Recent history
+    if(recent.length){
+      html += `<div class="weight-history-list">
+        <div class="sec-label">Recent Entries</div>
+        ${recent.slice(0,8).map(e=>`<div class="weight-history-item">
+          <span class="date">${new Date(e.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+          <span class="val">${e.weight} kg</span>
+        </div>`).join('')}
+      </div>`;
+    }
+
+    html += `</div>`;
+    const c = document.getElementById('content');
+    c.innerHTML = html;
+    return;
+  }
+
   const phase = PHASES[curPhase];
   const session = SESSIONS_BASE[curSession];
   const isUpper = session.type==='upper';
@@ -642,6 +742,7 @@ function renderCard(ex, isDeload){
           <div class="ex-count-lbl">sets</div>
           ${prev?`<div class="ex-prev">${prev}</div>`:''}
         </div>
+        <button class="graph-btn" onclick="openLiftGraph('${ex.id}','${ex.name}')">Graph</button>
         <div class="ex-chevron">▾</div>
       </div>
     </div>
@@ -833,6 +934,67 @@ function openHistory(){
 function closeHistory(){document.getElementById('histModal').classList.remove('open')}
 function closeHistoryBg(e){if(e.target===document.getElementById('histModal'))closeHistory()}
 
+function openLiftGraph(exId, exName){
+  document.getElementById('graphTitle').textContent = exName + ' Progress';
+  const data = getLiftData(exId);
+  const body = document.getElementById('graphBody');
+  if(data.length < 2){
+    body.innerHTML = '<div class="graph-empty">Need at least 2 workouts with this exercise to show graph</div>';
+  }else{
+    // Build HTML with canvas
+    body.innerHTML = '<canvas id="liftGraphCanvas" class="graph-canvas" style="width:100%;height:160px"></canvas>';
+    const canvas = document.getElementById('liftGraphCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 300;
+    canvas.height = 160;
+    const pad = {l:35, r:10, t:10, b:25};
+    const w = canvas.width - pad.l - pad.r;
+    const h = canvas.height - pad.t - pad.b;
+    const ys = data.map(d => d.v);
+    const minY = Math.min(...ys) * 0.95;
+    const maxY = Math.max(...ys) * 1.05;
+    const range = maxY - minY || 1;
+    // Line
+    ctx.strokeStyle = '#b8f04a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((d, i) => {
+      const x = pad.l + (i / (data.length - 1)) * w;
+      const y = pad.t + h - ((d.v - minY) / range) * h;
+      if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    // Points
+    data.forEach((d, i) => {
+      const x = pad.l + (i / (data.length - 1)) * w;
+      const y = pad.t + h - ((d.v - minY) / range) * h;
+      ctx.fillStyle = '#b8f04a';
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    // Y labels
+    ctx.fillStyle = '#777';
+    ctx.font = '9px "DM Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(maxY.toFixed(0), pad.l - 4, pad.t + 10);
+    ctx.fillText(minY.toFixed(0), pad.l - 4, pad.t + h);
+    // X labels (dates)
+    ctx.textAlign = 'center';
+    data.forEach((d, i) => {
+      if(i % Math.ceil(data.length / 5) === 0 || i === data.length - 1){
+        const x = pad.l + (i / (data.length - 1)) * w;
+        const date = new Date(d.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+        ctx.fillText(date, x, canvas.height - 5);
+      }
+    });
+  }
+  document.getElementById('graphModal').classList.add('open');
+}
+
+function closeGraph(){document.getElementById('graphModal').classList.remove('open')}
+function closeGraphBg(e){if(e.target===document.getElementById('graphModal'))closeGraph()}
+
 // ══════════════════════════════════════════════
 // TOAST
 // ══════════════════════════════════════════════
@@ -840,6 +1002,139 @@ function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ══════════════════════════════════════════════
+// WEIGHT TRACKING
+// ══════════════════════════════════════════════
+function saveWeight(val){
+  if(!val)return;
+  const w=parseFloat(val);
+  if(isNaN(w))return;
+  const today=new Date().toISOString().split('T')[0];
+  // Remove any entry for today
+  weightLog=weightLog.filter(e=>e.date!==today);
+  weightLog.unshift({date:today,weight:w});
+  weightLog=weightLog.slice(0,200);
+  save();
+}
+
+function getWeightTrend(){
+  if(weightLog.length<2)return'';
+  const curr=weightLog[0].weight;
+  const prev=weightLog[1].weight;
+  if(curr>prev)return'<span class="weight-trend up">↑'+(curr-prev).toFixed(1)+'</span>';
+  if(curr<prev)return'<span class="weight-trend down">↓'+(prev-curr).toFixed(1)+'</span>';
+  return'<span class="weight-trend" style="color:var(--dim)">−</span>';
+}
+
+// ══════════════════════════════════════════════
+// GRAPHS
+// ══════════════════════════════════════════════
+function renderLiftGraph(exId){
+  const data=getLiftData(exId);
+  if(data.length<2)return'<div class="graph-empty">Need more data to graph</div>';
+  const ctx=document.createElement('canvas');
+  ctx.width=300;ctx.height=140;
+  const c=ctx.getContext('2d');
+  const pad={l:30,r:10,t:10,b:20};
+  const w=ctx.width-pad.l-pad.r;
+  const h=ctx.height-pad.t-pad.b;
+  // Auto-scale
+  const ys=data.map(d=>d.v);
+  const minY=Math.min(...ys)*0.95;
+  const maxY=Math.max(...ys)*1.05;
+  const range=maxY-minY||1;
+  // Draw line
+  c.strokeStyle='#f0f0f0';
+  c.lineWidth=2;
+  c.beginPath();
+  data.forEach((d,i)=>{
+    const x=pad.l+(i/(data.length-1))*w;
+    const y=pad.t+h-((d.v-minY)/range)*h;
+    if(i===0)c.moveTo(x,y);else c.lineTo(x,y);
+  });
+  c.stroke();
+  // Draw points
+  data.forEach((d,i)=>{
+    const x=pad.l+(i/(data.length-1))*w;
+    const y=pad.t+h-((d.v-minY)/range)*h;
+    c.fillStyle='#b8f04a';
+    c.beginPath();
+    c.arc(x,y,3,0,Math.PI*2);
+    c.fill();
+  });
+  // Y axis labels
+  c.fillStyle='#777';
+  c.font='9px "DM Mono",monospace';
+  c.textAlign='right';
+  c.fillText(maxY.toFixed(0),pad.l-4,pad.t+10);
+  c.fillText(minY.toFixed(0),pad.l-4,pad.t+h);
+  return`<canvas class="graph-canvas"></canvas>`;
+}
+
+function renderWeightGraph(){
+  if(weightLog.length<2)return'<div class="graph-empty">Need more data to graph</div>';
+  const data=weightLog.slice(0,12).reverse();
+  const ctx=document.createElement('canvas');
+  ctx.width=300;ctx.height=140;
+  const c=ctx.getContext('2d');
+  const pad={l:30,r:10,t:10,b:20};
+  const w=ctx.width-pad.l-pad.r;
+  const h=ctx.height-pad.t-pad.b;
+  // Auto-scale
+  const ys=data.map(d=>d.weight);
+  const minY=Math.min(...ys)-0.5;
+  const maxY=Math.max(...ys)+0.5;
+  const range=maxY-minY;
+  // Draw line
+  c.strokeStyle='#f04aff';
+  c.lineWidth=2;
+  c.beginPath();
+  data.forEach((d,i)=>{
+    const x=pad.l+(i/(data.length-1))*w;
+    const y=pad.t+h-((d.weight-minY)/range)*h;
+    if(i===0)c.moveTo(x,y);else c.lineTo(x,y);
+  });
+  c.stroke();
+  // Draw points
+  data.forEach((d,i)=>{
+    const x=pad.l+(i/(data.length-1))*w;
+    const y=pad.t+h-((d.weight-minY)/range)*h;
+    c.fillStyle='#f04aff';
+    c.beginPath();
+    c.arc(x,y,3,0,Math.PI*2);
+    c.fill();
+  });
+  // Y axis labels
+  c.fillStyle='#777';
+  c.font='9px "DM Mono",monospace';
+  c.textAlign='right';
+  c.fillText(maxY.toFixed(1),pad.l-4,pad.t+10);
+  c.fillText(minY.toFixed(1),pad.l-4,pad.t+h);
+  return`<canvas class="graph-canvas"></canvas>`;
+}
+
+function getLiftData(exId){
+  // Get best weight×reps from history for this exercise
+  const results=[];
+  history.forEach(e=>{
+    const ex=e.exercises.find(x=>x.id===exId);
+    if(ex&&ex.sets.length){
+      const best=ex.sets.reduce((a,b)=>{
+        const va=(parseFloat(b.weight)||0)*(parseFloat(b.reps)||0);
+        const vb=(parseFloat(a.weight)||0)*(parseFloat(a.reps)||0);
+        return vb>va?b:a;
+      });
+      if(best.weight){
+        results.push({
+          date:e.date,
+          v:(parseFloat(best.weight)||0)*(parseFloat(best.reps)||0
+        });
+      }
+    }
+  });
+  return results.slice(0,12);
 }
 
 // ══════════════════════════════════════════════
