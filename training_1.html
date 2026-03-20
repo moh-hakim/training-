@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080808">
+<meta name="color-scheme" content="dark">
+<title>12-Week Program</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#080808;--s1:#101010;--s2:#161616;--s3:#1c1c1c;
+  --b1:#1e1e1e;--b2:#282828;--b3:#333;
+  --upper:#b8f04a;--lower:#4ab8f0;
+  --phase1:#f0a84a;--phase2:#b84af0;--phase3:#f04a4a;
+  --text:#f0f0f0;--dim:#777;--faint:#3a3a3a;
+  --success:#4af09a;--radius:6px;
+}
+html,body{height:100%;background:var(--bg)}
+body{color:var(--text);font-family:'DM Sans',sans-serif;overscroll-behavior:none}
+input[type=number]{color-scheme:dark}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(8,8,8,0.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--b1);padding:0 14px;display:flex;align-items:center;justify-content:space-between;height:54px}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--text)}
+.nav-right{display:flex;gap:6px}
+.btn-sm{background:var(--s2);border:1px solid var(--b2);color:var(--dim);border-radius:var(--radius);padding:6px 11px;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .15s}
+.btn-sm:hover{background:var(--s3);color:var(--text)}
+
+/* PHASE SELECTOR */
+.phase-bar{display:grid;grid-template-columns:repeat(3,1fr);background:var(--s1);border-bottom:1px solid var(--b1)}
+.phase-tab{padding:10px 6px;text-align:center;cursor:pointer;transition:background .15s;position:relative;border-bottom:2px solid transparent}
+.phase-tab:hover{background:var(--s2)}
+.phase-tab.active{background:var(--s2)}
+.phase-tab .ph-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px}
+.phase-tab .ph-name{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px}
+.phase-tab .ph-weeks{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint);margin-top:2px}
+.phase-tab[data-phase="1"] .ph-name{color:var(--phase1)}
+.phase-tab[data-phase="2"] .ph-name{color:var(--phase2)}
+.phase-tab[data-phase="3"] .ph-name{color:var(--phase3)}
+.phase-tab[data-phase="1"].active{border-bottom-color:var(--phase1)}
+.phase-tab[data-phase="2"].active{border-bottom-color:var(--phase2)}
+.phase-tab[data-phase="3"].active{border-bottom-color:var(--phase3)}
+
+/* WEEK SELECTOR */
+.week-bar{display:flex;background:var(--s1);border-bottom:1px solid var(--b1);overflow-x:auto;scrollbar-width:none}
+.week-bar::-webkit-scrollbar{display:none}
+.week-tab{flex-shrink:0;padding:8px 16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--faint);cursor:pointer;transition:all .15s;border-bottom:2px solid transparent;white-space:nowrap;text-transform:uppercase;letter-spacing:1px}
+.week-tab:hover{color:var(--dim)}
+.week-tab.active{color:var(--text);border-bottom-color:var(--text)}
+.week-tab.deload{color:#f04a4a}
+.week-tab.deload.active{border-bottom-color:#f04a4a}
+
+/* SESSION TABS */
+.session-tabs{display:grid;grid-template-columns:repeat(5,1fr);background:var(--s1);border-bottom:1px solid var(--b1)}
+.stab{padding:9px 4px;text-align:center;cursor:pointer;transition:background .15s;border-bottom:2px solid transparent}
+.stab:hover{background:var(--s2)}
+.stab.active{background:var(--s2)}
+.stab .st-day{font-family:'DM Mono',monospace;font-size:8px;color:var(--faint);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.stab .st-name{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px}
+.stab.upper .st-name{color:var(--upper)}
+.stab.lower .st-name{color:var(--lower)}
+.stab.upper.active{border-bottom-color:var(--upper)}
+.stab.lower.active{border-bottom-color:var(--lower)}
+.stab.weight .st-name{color:#f04aff}
+.stab.weight.active{border-bottom-color:#f04aff}
+
+/* CONTENT */
+.content{padding:14px 12px 100px;max-width:580px;margin:0 auto;background:var(--bg)}
+
+/* PHASE BANNER */
+.phase-banner{padding:12px 14px;border-radius:var(--radius);margin-bottom:16px;border:1px solid}
+.phase-banner.p1{background:rgba(240,168,74,0.06);border-color:rgba(240,168,74,0.2)}
+.phase-banner.p2{background:rgba(184,74,240,0.06);border-color:rgba(184,74,240,0.2)}
+.phase-banner.p3{background:rgba(240,74,74,0.06);border-color:rgba(240,74,74,0.2)}
+.phase-banner.deload{background:rgba(240,74,74,0.06);border-color:rgba(240,74,74,0.3)}
+.pb-label{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
+.pb-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px}
+.pb-desc{font-size:11px;color:var(--dim);margin-top:3px;line-height:1.5;font-weight:300}
+.p1 .pb-label,.p1 .pb-title{color:var(--phase1)}
+.p2 .pb-label,.p2 .pb-title{color:var(--phase2)}
+.p3 .pb-label,.p3 .pb-title{color:var(--phase3)}
+.deload .pb-label,.deload .pb-title{color:#f04a4a}
+
+/* SESSION HEADER */
+.session-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--b1);gap:10px}
+.sh-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;padding:3px 8px;border:1px solid;border-radius:2px;margin-bottom:5px}
+.upper-badge{color:var(--upper);border-color:var(--upper);background:rgba(184,240,74,0.06)}
+.lower-badge{color:var(--lower);border-color:var(--lower);background:rgba(74,184,240,0.06)}
+.sh-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;line-height:1.1}
+.sh-right{text-align:right;flex-shrink:0}
+.sh-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);margin-bottom:6px}
+.btn-save{border:none;border-radius:var(--radius);padding:9px 14px;font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.btn-save:hover{opacity:.85}
+.upper-session .btn-save{background:var(--upper);color:#000}
+.lower-session .btn-save{background:var(--lower);color:#000}
+
+/* SECTION LABEL */
+.sec-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:2px;margin:16px 0 7px 2px}
+
+/* EXERCISE CARD */
+.ex-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);margin-bottom:7px;overflow:hidden;transition:border-color .15s}
+.ex-card.primary{border-left:3px solid var(--upper)}
+.lower-session .ex-card.primary{border-left-color:var(--lower)}
+.ex-card.paired{border-left:3px solid var(--faint)}
+.ex-card.accessory{border-left:3px solid transparent}
+
+.ex-header{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;cursor:pointer}
+.ex-header-left{flex:1}
+.ex-code{font-family:'DM Mono',monospace;font-size:8px;color:var(--faint);margin-bottom:2px}
+.ex-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+.ex-target{font-size:10px;color:var(--dim);margin-top:2px;font-weight:300}
+.ex-scheme{font-family:'DM Mono',monospace;font-size:10px;margin-top:3px}
+.ex-card.primary .ex-scheme{color:var(--upper)}
+.lower-session .ex-card.primary .ex-scheme{color:var(--lower)}
+.ex-card.accessory .ex-scheme,.ex-card.paired .ex-scheme{color:var(--dim)}
+
+.ex-header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:8px}
+.ex-count{text-align:right}
+.ex-count-num{font-family:'DM Mono',monospace;font-size:14px}
+.ex-count-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--faint);text-transform:uppercase}
+.ex-prev{font-family:'DM Mono',monospace;font-size:8px;color:var(--faint);margin-top:2px}
+.ex-chevron{color:var(--faint);font-size:11px;transition:transform .2s}
+.ex-card.open .ex-chevron{transform:rotate(180deg)}
+
+/* SET LOGGER */
+.set-logger{display:none;border-top:1px solid var(--b1);padding:11px 13px;background:var(--s2)}
+.ex-card.open .set-logger{display:block}
+.set-hdr{display:grid;grid-template-columns:20px 1fr 1fr 38px;gap:7px;margin-bottom:7px;font-family:'DM Mono',monospace;font-size:8px;color:var(--faint);text-transform:uppercase;letter-spacing:1px;text-align:center}
+.set-hdr div:first-child{text-align:left}
+.set-row{display:grid;grid-template-columns:20px 1fr 1fr 38px;gap:7px;align-items:center;margin-bottom:5px}
+.set-n{font-family:'DM Mono',monospace;font-size:10px;color:var(--faint);text-align:center}
+.set-inp{background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--text);font-family:'DM Mono',monospace;font-size:15px;padding:9px 5px;width:100%;text-align:center;outline:none;transition:border-color .15s;-webkit-appearance:none}
+.set-inp:focus{border-color:var(--upper)}
+.lower-session .set-inp:focus{border-color:var(--lower)}
+.set-inp::placeholder{color:var(--faint)}
+.set-inp.done{border-color:var(--success);background:rgba(74,240,154,0.05);color:var(--success)}
+.set-chk{background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--faint);width:38px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0;font-size:14px}
+.set-chk.done{background:rgba(74,240,154,0.1);border-color:var(--success);color:var(--success)}
+.set-footer{display:flex;gap:7px;margin-top:7px}
+.btn-add{flex:1;background:transparent;border:1px dashed var(--b2);border-radius:4px;color:var(--faint);font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:8px;cursor:pointer;transition:all .15s}
+.btn-add:hover{border-color:var(--dim);color:var(--dim)}
+.btn-rem{background:transparent;border:1px solid var(--b1);border-radius:4px;color:var(--faint);font-family:'DM Mono',monospace;font-size:10px;padding:8px 12px;cursor:pointer;transition:all .15s}
+.btn-rem:hover{border-color:#f04a4a;color:#f04a4a}
+.prev-note{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint);text-align:center;padding:7px 0 1px;border-top:1px solid var(--b1);margin-top:8px}
+.prev-note span{color:var(--dim)}
+
+/* PAIR CONNECTOR */
+.pair-conn{display:flex;align-items:center;gap:7px;padding:3px 0;font-family:'DM Mono',monospace;font-size:8px;color:var(--faint);text-transform:uppercase;letter-spacing:2px;margin:2px 0}
+.pair-conn::before,.pair-conn::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+/* REST BADGE */
+.rest-badge{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:9px;color:var(--faint);margin-top:3px}
+.rest-badge::before{content:'⏱';font-size:9px}
+
+/* PROG NOTE */
+.prog-note{background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--faint);border-radius:var(--radius);padding:11px 13px;margin-top:18px}
+.prog-note-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--faint);text-transform:uppercase;letter-spacing:2px;margin-bottom:5px}
+.prog-note-text{font-size:11px;color:var(--dim);line-height:1.6;font-weight:300}
+.prog-note-text strong{color:var(--text);font-weight:500}
+
+/* OVERLOAD SECTION */
+.overload-box{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:13px;margin-top:10px}
+.overload-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--text);margin-bottom:8px}
+.overload-item{display:flex;gap:8px;margin-bottom:6px;font-size:11px;color:var(--dim);line-height:1.5}
+.overload-item::before{content:'→';color:var(--faint);flex-shrink:0;margin-top:1px}
+.overload-item strong{color:var(--text)}
+
+/* HISTORY MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:200;backdrop-filter:blur(4px)}
+.modal-bg.open{display:flex;align-items:flex-end}
+.modal{background:var(--s1);border:1px solid var(--b2);border-bottom:none;border-radius:12px 12px 0 0;width:100%;max-width:580px;margin:0 auto;max-height:82vh;overflow-y:auto;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-hdr{position:sticky;top:0;background:var(--s1);padding:16px 16px 12px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px}
+.btn-close{background:var(--s3);border:1px solid var(--b2);border-radius:50%;color:var(--dim);width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px}
+.modal-body{padding:14px 16px 36px}
+.hist-entry{margin-bottom:22px}
+.hist-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--b1)}
+.hist-ex{margin-bottom:9px}
+.hist-ex-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.hist-set{display:flex;gap:7px;font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);padding:1px 0}
+.hist-set .v{color:var(--text)}
+.no-hist{font-family:'DM Mono',monospace;font-size:10px;color:var(--faint);text-align:center;padding:40px 0;text-transform:uppercase;letter-spacing:2px}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--s3);border:1px solid var(--b2);border-radius:var(--radius);padding:9px 18px;font-family:'DM Mono',monospace;font-size:10px;color:var(--text);letter-spacing:1px;z-index:300;transition:transform .3s ease;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .2s ease}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* Graph */
+.graph-box{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:12px;margin:12px 0}
+.graph-canvas{width:100%;height:140px}
+.graph-title{font-family:'Bebas Neue',sans-serif;font-size:14px;margin-bottom:8px}
+.graph-empty{font-family:'DM Mono',monospace;font-size:10px;color:var(--faint);text-align:center;padding:20px}
+.graph-btn{background:var(--s3);border:1px solid var(--b2);border-radius:var(--radius);color:var(--dim);font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;padding:6px 10px;cursor:pointer;transition:all .15s}
+.graph-btn:hover{background:var(--s2);color:var(--text)}
+
+/* Weight Tab */
+.weight-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.weight-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.weight-current{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:#f04aff}
+.weight-trend{font-family:'DM Mono',monospace;font-size:10px;margin-left:8px}
+.weight-trend.up{color:#4af09a}
+.weight-trend.down{color:#f04a4a}
+.weight-input-row{display:flex;gap:8px;align-items:center}
+.weight-input{background:var(--s3);border:1px solid var(--b2);border-radius:4px;color:var(--text);font-family:'DM Mono',monospace;font-size:18px;padding:10px 12px;width:100px;text-align:center;outline:none;-webkit-appearance:none}
+.weight-input:focus{border-color:#f04aff}
+.weight-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--faint);flex:1;text-align:right}
+.weight-history-list{display:flex;flex-direction:column;gap:6px;margin-top:14px;padding-top:14px;border-top:1px solid var(--b1)}
+.weight-history-item{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px}
+.weight-history-item .date{color:var(--faint)}
+.weight-history-item .val{color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-logo">12-Week Program</div>
+  <div class="nav-right">
+    <button class="btn-sm" onclick="openHistory()">History</button>
+    <button class="btn-sm" onclick="clearSession()">Clear</button>
+  </div>
+</div>
+
+<div class="phase-bar">
+  <div class="phase-tab active" data-phase="1" onclick="setPhase(1)">
+    <div class="ph-num">Phase 1</div>
+    <div class="ph-name">Hypertrophy</div>
+    <div class="ph-weeks">Weeks 1–4</div>
+  </div>
+  <div class="phase-tab" data-phase="2" onclick="setPhase(2)">
+    <div class="ph-num">Phase 2</div>
+    <div class="ph-name">Strength</div>
+    <div class="ph-weeks">Weeks 5–8</div>
+  </div>
+  <div class="phase-tab" data-phase="3" onclick="setPhase(3)">
+    <div class="ph-num">Phase 3</div>
+    <div class="ph-name">Peaking</div>
+    <div class="ph-weeks">Weeks 9–12</div>
+  </div>
+</div>
+
+<div class="week-bar" id="weekBar"></div>
+
+<div class="session-tabs" id="sessionTabs">
+  <div class="stab upper active" data-sid="upperA" onclick="setSession('upperA')">
+    <div class="st-day">Day 1</div>
+    <div class="st-name">Upper A</div>
+  </div>
+  <div class="stab lower" data-sid="lowerA" onclick="setSession('lowerA')">
+    <div class="st-day">Day 2</div>
+    <div class="st-name">Lower A</div>
+  </div>
+  <div class="stab upper" data-sid="upperB" onclick="setSession('upperB')">
+    <div class="st-day">Day 3</div>
+    <div class="st-name">Upper B</div>
+  </div>
+  <div class="stab lower" data-sid="lowerB" onclick="setSession('lowerB')">
+    <div class="st-day">Day 4</div>
+    <div class="st-name">Lower B</div>
+  </div>
+  <div class="stab weight" data-sid="weight" onclick="setSession('weight')">
+    <div class="st-day">Track</div>
+    <div class="st-name">Weight</div>
+  </div>
+</div>
+
+<div class="content fade-in" id="content"></div>
+
+<div class="modal-bg" id="histModal" onclick="closeHistoryBg(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">Workout History</div>
+      <div class="btn-close" onclick="closeHistory()">✕</div>
+    </div>
+    <div class="modal-body" id="histBody"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="graphModal" onclick="closeGraphBg(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="graphTitle">Lift Progress</div>
+      <div class="btn-close" onclick="closeGraph()">✕</div>
+    </div>
+    <div class="modal-body" id="graphBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// PROGRAM DATA
+// ══════════════════════════════════════════════
+
+const PHASES = {
+  1: {
+    name: 'Accumulation / Hypertrophy',
+    label: 'Phase 1',
+    cls: 'p1',
+    color: '#f0a84a',
+    repRange: '8–12 reps',
+    desc: 'Higher volume, moderate intensity. Build metabolic base and muscle thickness. Focus on mind-muscle connection and clean technique.',
+    weeks: [1,2,3,4],
+    deloadWeek: 4,
+    progression: 'Add 2.5kg when you hit the top of the rep range for all sets at RPE ≤ 8. If you miss reps, stay at the same weight.',
+  },
+  2: {
+    name: 'Intensification / Strength',
+    label: 'Phase 2',
+    cls: 'p2',
+    color: '#b84af0',
+    repRange: '5–8 reps',
+    desc: 'Moderate volume, higher intensity. Transition to force production. Compound movements increase in load, accessories maintain volume.',
+    weeks: [5,6,7,8],
+    deloadWeek: 8,
+    progression: 'Add 2.5–5kg when you complete all reps at RPE ≤ 8. At RPE 9+, hold weight and aim to reduce RPE over sessions.',
+  },
+  3: {
+    name: 'Peaking / Max Strength',
+    label: 'Phase 3',
+    cls: 'p3',
+    color: '#f04a4a',
+    repRange: '2–5 reps',
+    desc: 'Low volume, very high intensity on primaries. Accessories maintain moderate volume. Prepare for peak strength expression.',
+    weeks: [9,10,11,12],
+    deloadWeek: 12,
+    progression: 'Add 2.5kg on success. If you fail a rep, drop 10% and rebuild. After Week 11, Week 12 is deload — do not max test.',
+  }
+};
+
+// EXERCISE TEMPLATES per session
+// Each phase modifies sets/reps/rpe
+const SESSIONS_BASE = {
+  upperA: {
+    name: 'Upper A — Bench Focus',
+    type: 'upper', label: 'Upper',
+    exercises: [
+      {id:'uA1', name:'Flat BB Bench / Larsen (rotate)', type:'primary', rest:'3–4 min',
+        phases:{
+          1:{scheme:'4×8–10', rpe:'RPE 7–8', sets:4, note:'Rotate: Bench wks 1&3, Larsen wks 2&4'},
+          2:{scheme:'4×5–6', rpe:'RPE 8', sets:4, note:'Focus on bar speed off chest'},
+          3:{scheme:'4×3–4', rpe:'RPE 8–9', sets:4, note:'Controlled descent, explosive press'},
+        }},
+      {id:'uA2', name:'Weighted Pull-Ups', type:'primary', rest:'3 min',
+        phases:{
+          1:{scheme:'4×8–10', rpe:'RPE 7–8', sets:4, note:'Dead hang, full ROM'},
+          2:{scheme:'4×5–6', rpe:'RPE 8', sets:4, note:'Add weight each week if possible'},
+          3:{scheme:'4×3–5', rpe:'RPE 8–9', sets:4, note:'Heavier belt, slow eccentric'},
+        }},
+      {id:'uA3', name:'Incline DB Press', type:'accessory', rest:'2 min',
+        phases:{
+          1:{scheme:'3×10–12', rpe:'RPE 7', sets:3, note:'30° incline, neutral grip'},
+          2:{scheme:'3×8–10', rpe:'RPE 7–8', sets:3, note:'Same angle, increase load'},
+          3:{scheme:'3×8–10', rpe:'RPE 7', sets:3, note:'Maintain volume, moderate load'},
+        }},
+      {id:'uA4', name:'Seated Cable Row', type:'accessory', rest:'90 sec',
+        phases:{
+          1:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'Full retraction at top'},
+          2:{scheme:'3×10–12', rpe:'RPE 7–8', sets:3, note:'Increase load progressively'},
+          3:{scheme:'3×10–12', rpe:'RPE 7', sets:3, note:'Keep volume stable'},
+        }},
+      {id:'uA5', name:'Lateral Raises', type:'accessory', rest:'60 sec',
+        phases:{
+          1:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'Cable or DB, slow eccentric'},
+          2:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'Consistent across all phases'},
+          3:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'Shoulder health maintenance'},
+        }},
+      {id:'uA6', name:'EZ-Bar Curl', type:'accessory', rest:'60 sec',
+        phases:{
+          1:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'Supinated, slow eccentric'},
+          2:{scheme:'3×10–12', rpe:'RPE 7–8', sets:3, note:'Slight load increase'},
+          3:{scheme:'3×10–12', rpe:'RPE 7', sets:3, note:'Maintain'},
+        }},
+      {id:'uA7', name:'Overhead Tricep Extension', type:'accessory', rest:'60 sec',
+        phases:{
+          1:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'Cable or EZ-bar, long head'},
+          2:{scheme:'3×10–12', rpe:'RPE 7–8', sets:3, note:'Load increase'},
+          3:{scheme:'3×10–12', rpe:'RPE 7', sets:3, note:'Maintain'},
+        }},
+    ]
+  },
+  lowerA: {
+    name: 'Lower A — Squat Focus',
+    type: 'lower', label: 'Lower',
+    exercises: [
+      {id:'lA1', name:'High Bar Back Squat', type:'primary', rest:'3–4 min',
+        phases:{
+          1:{scheme:'4×8–10', rpe:'RPE 7–8', sets:4, note:'Full depth, brace hard, tempo 3-0-1'},
+          2:{scheme:'4×5–6', rpe:'RPE 8', sets:4, note:'Increase load, maintain depth'},
+          3:{scheme:'4×2–4', rpe:'RPE 8–9', sets:4, note:'Max effort sets, no grinding'},
+        }},
+      {id:'lA2', name:'Smith Machine Stiff Leg DL', type:'primary', rest:'2–3 min',
+        phases:{
+          1:{scheme:'3×10–12', rpe:'RPE 7', sets:3, note:'Hip hinge, feel the hamstring stretch'},
+          2:{scheme:'3×8–10', rpe:'RPE 7–8', sets:3, note:'Heavier, controlled'},
+          3:{scheme:'3×8–10', rpe:'RPE 7–8', sets:3, note:'Maintain volume'},
+        }},
+      {id:'lA3', name:'Leg Extension', type:'accessory', rest:'90 sec',
+        phases:{
+          1:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'3 sec eccentric, quad burnout'},
+          2:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'Load increase'},
+          3:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'Maintain'},
+        }},
+      {id:'lA4', name:'Lying Leg Curl', type:'accessory', rest:'90 sec',
+        phases:{
+          1:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'Full ROM, controlled'},
+          2:{scheme:'3×10–12', rpe:'RPE 7–8', sets:3, note:'Load increase'},
+          3:{scheme:'3×10–12', rpe:'RPE 7', sets:3, note:'Maintain'},
+        }},
+      {id:'lA5', name:'Standing Calf Raise', type:'accessory', rest:'60 sec',
+        phases:{
+          1:{scheme:'4×15–20', rpe:'RPE 7', sets:4, note:'Pause at stretch and peak'},
+          2:{scheme:'4×12–15', rpe:'RPE 7–8', sets:4, note:'Load increase'},
+          3:{scheme:'4×12–15', rpe:'RPE 7', sets:4, note:'Maintain'},
+        }},
+    ]
+  },
+  upperB: {
+    name: 'Upper B — Row Focus',
+    type: 'upper', label: 'Upper',
+    exercises: [
+      {id:'uB1', name:'Low Row Variation', type:'primary', rest:'3 min',
+        phases:{
+          1:{scheme:'4×8–10', rpe:'RPE 7–8', sets:4, note:'Pick one variation and stick — seated cable, chest-supported or T-bar'},
+          2:{scheme:'4×6–8', rpe:'RPE 8', sets:4, note:'Load progression, full retraction'},
+          3:{scheme:'4×5–6', rpe:'RPE 8–9', sets:4, note:'Heavy rows, controlled pull'},
+        }},
+      {id:'uB2', name:'Incline DB Press', type:'primary', rest:'2–3 min',
+        phases:{
+          1:{scheme:'4×10–12', rpe:'RPE 7–8', sets:4, note:'30–45°, press through full ROM'},
+          2:{scheme:'4×8–10', rpe:'RPE 8', sets:4, note:'Load increase each week'},
+          3:{scheme:'4×6–8', rpe:'RPE 8–9', sets:4, note:'Heavier DBs'},
+        }},
+      {id:'uB3', name:'Single-Arm DB Row', type:'accessory', rest:'90 sec',
+        phases:{
+          1:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'Pull to hip, not armpit'},
+          2:{scheme:'3×10–12', rpe:'RPE 7–8', sets:3, note:'Load increase'},
+          3:{scheme:'3×10–12', rpe:'RPE 7', sets:3, note:'Maintain'},
+        }},
+      {id:'uB4', name:'Rear Delt Fly', type:'accessory', rest:'60 sec',
+        phases:{
+          1:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'Horizontal abduction, light weight'},
+          2:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'Consistent'},
+          3:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'Shoulder health priority'},
+        }},
+      {id:'uB5', name:'Lateral Raises', type:'accessory', rest:'60 sec',
+        phases:{
+          1:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'Cable preferred'},
+          2:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'Consistent'},
+          3:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'Maintain'},
+        }},
+      {id:'uB6', name:'Hammer Curl', type:'accessory', rest:'60 sec',
+        phases:{
+          1:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'Neutral grip, brachialis'},
+          2:{scheme:'3×10–12', rpe:'RPE 7–8', sets:3, note:'Load increase'},
+          3:{scheme:'3×10–12', rpe:'RPE 7', sets:3, note:'Maintain'},
+        }},
+      {id:'uB7', name:'Cable Pushdown', type:'accessory', rest:'60 sec',
+        phases:{
+          1:{scheme:'3×15–20', rpe:'RPE 7', sets:3, note:'Elbows fixed, rope or bar'},
+          2:{scheme:'3×12–15', rpe:'RPE 7–8', sets:3, note:'Load increase'},
+          3:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'Maintain'},
+        }},
+    ]
+  },
+  lowerB: {
+    name: 'Lower B — Deadlift Focus',
+    type: 'lower', label: 'Lower',
+    exercises: [
+      {id:'lB1', name:'Trap Bar Deadlift', type:'primary', rest:'3–4 min', paired:true,
+        phases:{
+          1:{scheme:'4×8–10', rpe:'RPE 7–8', sets:4, note:'Drive floor away, maintain brace'},
+          2:{scheme:'4×5–6', rpe:'RPE 8', sets:4, note:'Load progression each week'},
+          3:{scheme:'4×2–4', rpe:'RPE 8–9', sets:4, note:'Max effort, reset fully each rep'},
+        }},
+      {id:'lB2', name:'Leg Press', type:'paired', rest:'90 sec', pairLabel:true,
+        phases:{
+          1:{scheme:'4×12–15', rpe:'RPE 7', sets:4, note:'Superset after DL — rest 60–90s first'},
+          2:{scheme:'4×10–12', rpe:'RPE 7–8', sets:4, note:'Load increase'},
+          3:{scheme:'4×10–12', rpe:'RPE 7', sets:4, note:'Maintain volume'},
+        }},
+      {id:'lB3', name:'Romanian Deadlift', type:'accessory', rest:'2 min',
+        phases:{
+          1:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'DB or bar, feel the hamstring'},
+          2:{scheme:'3×10–12', rpe:'RPE 7–8', sets:3, note:'Load increase'},
+          3:{scheme:'3×10–12', rpe:'RPE 7–8', sets:3, note:'Maintain'},
+        }},
+      {id:'lB4', name:'Seated Leg Curl', type:'accessory', rest:'90 sec',
+        phases:{
+          1:{scheme:'3×12–15', rpe:'RPE 7', sets:3, note:'Greater stretch vs lying'},
+          2:{scheme:'3×10–12', rpe:'RPE 7–8', sets:3, note:'Load increase'},
+          3:{scheme:'3×10–12', rpe:'RPE 7', sets:3, note:'Maintain'},
+        }},
+      {id:'lB5', name:'Seated Calf Raise', type:'accessory', rest:'60 sec',
+        phases:{
+          1:{scheme:'4×15–20', rpe:'RPE 7', sets:4, note:'Soleus focus, slow and deep'},
+          2:{scheme:'4×12–15', rpe:'RPE 7–8', sets:4, note:'Load increase'},
+          3:{scheme:'4×12–15', rpe:'RPE 7', sets:4, note:'Maintain'},
+        }},
+    ]
+  },
+  weight: {
+    name: 'Weight Tracking',
+    type: 'weight', label: 'Weight',
+    exercises: [{id:'bodyWeight', name:'Body Weight', type:'primary', rest:'-'}]
+  }
+};
+
+const DELOAD = {
+  note: '🔴 DELOAD WEEK — Reduce all working sets to 2×, drop load by 40–50%, RPE ≤ 6 across the board. Focus on movement quality and recovery. Do not push intensity.',
+  modifier: { sets: 2, rpeNote: 'RPE 5–6 (deload)' }
+};
+
+const STALL_PROTOCOL = [
+  {trigger:'Miss reps on same weight 2 sessions in a row', fix:'Drop 10% and rebuild over 2–3 weeks with +2.5kg per session'},
+  {trigger:'RPE consistently at 9+ on working sets', fix:'Reduce load 5–7.5% and allow RPE to drift back down to 7–8 before progressing'},
+  {trigger:'Stall on accessory but not primary', fix:'Deload the accessory by 20% for one week, then resume with lighter starting point'},
+  {trigger:'Progress stalls across full session', fix:'Check sleep, nutrition (especially protein & carbs around session), and consider a 3–5 day full rest'},
+  {trigger:'Phase-to-phase transition feels too heavy', fix:'Spend Week 1 of new phase at RPE 6–7, treating it as a technical acclimation week'},
+];
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let curPhase = 1;
+let curWeek = 1;
+let curSession = 'upperA';
+let logState = {};    // {`${phase}-${week}-${sid}-${exId}`: {sets:[...]}}
+let history = [];
+let openCards = {};
+let weightLog = [];    // [{date, weight}]
+
+function ls(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch{return fb}}
+function ss(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+function load(){
+  logState = ls('prog12_log',{});
+  history  = ls('prog12_hist',[]);
+  curPhase = ls('prog12_phase',1);
+  curWeek  = ls('prog12_week',1);
+  curSession = ls('prog12_session','upperA');
+  weightLog = ls('prog12_weight',[]);
+}
+function save(){
+  ss('prog12_log',logState);
+  ss('prog12_hist',history);
+  ss('prog12_phase',curPhase);
+  ss('prog12_week',curWeek);
+  ss('prog12_session',curSession);
+  ss('prog12_weight',weightLog);
+}
+
+function stateKey(phase,week,sid,exId){return `${phase}-${week}-${sid}-${exId}`}
+function getExLog(phase,week,sid,ex){
+  const k = stateKey(phase,week,sid,ex.id);
+  if(!logState[k]){
+    const isDeload = PHASES[phase].deloadWeek===week;
+    const phaseData = ex.phases[phase];
+    const nSets = isDeload ? DELOAD.modifier.sets : phaseData.sets;
+    logState[k]={sets:Array.from({length:nSets},()=>({weight:'',reps:'',done:false}))};
+  }
+  return logState[k];
+}
+
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
+function render(){
+  try{
+    renderWeekBar();
+    renderSessionTabs();
+    renderContent();
+  }catch(e){
+    alert('Error in render: '+e);
+    console.log('Error in render:', e);
+  }
+}
+
+function renderWeekBar(){
+  const phase = PHASES[curPhase];
+  const wb = document.getElementById('weekBar');
+  wb.innerHTML = phase.weeks.map(w=>{
+    const isDeload = phase.deloadWeek===w;
+    const active = w===curWeek?' active':'';
+    const deload = isDeload?' deload':'';
+    return `<div class="week-tab${active}${deload}" onclick="setWeek(${w})">Week ${w}${isDeload?' 🔄':''}</div>`;
+  }).join('');
+}
+
+function renderSessionTabs(){
+  document.querySelectorAll('.stab').forEach(t=>{
+    const sid=t.dataset.sid;
+    const sdata=SESSIONS_BASE[sid];
+    const type = sid === 'weight' ? 'weight' : sdata.type;
+    t.className=`stab ${type}${sid===curSession?' active':''}`;
+  });
+}
+
+function renderContent(){
+  // Handle weight tab separately
+  if(curSession === 'weight'){
+    const today = new Date().toISOString().split('T')[0];
+    const lastEntry = weightLog[0];
+    const lastWeight = lastEntry ? lastEntry.weight : '';
+    const trend = getWeightTrend();
+    const recent = weightLog.slice(0,10);
+
+    let html = `<div class="weight-session">`;
+    html += `<div class="phase-banner p2">
+      <div class="pb-label">Body Weight Tracking</div>
+      <div class="pb-title">Track Your Weight</div>
+      <div class="pb-desc">Log your body weight to monitor progress over time</div>
+    </div>`;
+
+    html += `<div class="weight-card">
+      <div class="weight-header">
+        <div>
+          <div class="weight-current">${lastWeight ? lastWeight + ' kg' : '— kg'}</div>
+          ${trend}
+        </div>
+      </div>
+      <div class="weight-input-row">
+        <input class="weight-input" type="number" inputmode="decimal" placeholder="00.0" value="${lastWeight}" onchange="saveWeight(this.value)">
+        <div class="weight-date">${lastEntry ? new Date(lastEntry.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : 'Today'}</div>
+      </div>
+    </div>`;
+
+    // Weight graph
+    html += `<div class="graph-box">
+      <div class="graph-title">Weight Over Time</div>
+      ${renderWeightGraph()}
+    </div>`;
+
+    // Recent history
+    if(recent.length){
+      html += `<div class="weight-history-list">
+        <div class="sec-label">Recent Entries</div>
+        ${recent.slice(0,8).map(e=>`<div class="weight-history-item">
+          <span class="date">${new Date(e.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+          <span class="val">${e.weight} kg</span>
+        </div>`).join('')}
+      </div>`;
+    }
+
+    html += `</div>`;
+    const c = document.getElementById('content');
+    c.innerHTML = html;
+    return;
+  }
+
+  const phase = PHASES[curPhase];
+  const session = SESSIONS_BASE[curSession];
+  const isUpper = session.type==='upper';
+  const isDeload = phase.deloadWeek===curWeek;
+  const today = new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+
+  let html = `<div class="${session.type}-session">`;
+
+  // Phase banner
+  const bannerCls = isDeload ? 'deload' : phase.cls;
+  html += `<div class="phase-banner ${bannerCls}">
+    <div class="pb-label">${isDeload?'⚠ Deload Week':phase.label+' · Week '+curWeek}</div>
+    <div class="pb-title">${isDeload?'Recovery Week':phase.name}</div>
+    <div class="pb-desc">${isDeload?DELOAD.note:phase.desc+' <strong>'+phase.repRange+'</strong>'}</div>
+  </div>`;
+
+  // Session header
+  html += `<div class="session-head">
+    <div>
+      <div class="sh-badge ${isUpper?'upper':'lower'}-badge">${session.label}</div>
+      <div class="sh-title">${session.name}</div>
+    </div>
+    <div class="sh-right">
+      <div class="sh-date">${today}</div>
+      <button class="btn-save" onclick="saveWorkout()">Save</button>
+    </div>
+  </div>`;
+
+  // Main lifts
+  const mains = session.exercises.filter(e=>e.type==='primary'||e.type==='paired');
+  const accs   = session.exercises.filter(e=>e.type==='accessory');
+
+  html += `<div class="sec-label">Main Lifts</div>`;
+  mains.forEach(ex=>{
+    if(ex.pairLabel) html+=`<div class="pair-conn">superset</div>`;
+    html += renderCard(ex, isDeload);
+  });
+  html += `<div class="sec-label">Accessories</div>`;
+  accs.forEach(ex=> html += renderCard(ex, isDeload));
+
+  // Progressive overload logic
+  html += `<div class="prog-note">
+    <div class="prog-note-lbl">Progression — Phase ${curPhase}</div>
+    <div class="prog-note-text">${phase.progression}</div>
+  </div>`;
+
+  // Stall protocol
+  html += `<div class="overload-box">
+    <div class="overload-title">Handling Stalls</div>
+    ${STALL_PROTOCOL.map(s=>`<div class="overload-item"><div><strong>${s.trigger}:</strong> ${s.fix}</div></div>`).join('')}
+  </div>`;
+
+  html += `</div>`;
+  const c = document.getElementById('content');
+  c.innerHTML = html;
+  c.classList.remove('fade-in');
+  void c.offsetWidth;
+  c.classList.add('fade-in');
+}
+
+function renderCard(ex, isDeload){
+  const phase = curPhase;
+  const phData = ex.phases[phase];
+  const exLog  = getExLog(phase,curWeek,curSession,ex);
+  const done   = exLog.sets.filter(s=>s.done).length;
+  const total  = exLog.sets.length;
+  const isOpen = !!openCards[ex.id];
+  const prev   = getPrev(ex);
+
+  const scheme = isDeload ? `2×${phData.scheme.split('×')[1]} (deload)` : phData.scheme;
+  const rpe    = isDeload ? DELOAD.modifier.rpeNote : phData.rpe;
+  const borderMap = {primary:'upper',paired:'faint',accessory:'transparent'};
+
+  return `<div class="ex-card ${ex.type}${isOpen?' open':''}" id="card-${ex.id}">
+    <div class="ex-header" onclick="toggleCard('${ex.id}')">
+      <div class="ex-header-left">
+        <div class="ex-code">${ex.id.toUpperCase()}</div>
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-scheme">${scheme} · ${rpe}</div>
+        <div class="ex-target">${phData.note}</div>
+        <div class="rest-badge">${ex.rest}</div>
+      </div>
+      <div class="ex-header-right">
+        <div class="ex-count">
+          <div class="ex-count-num" style="color:${done===total&&done>0?'#4af09a':'#f0f0f0'}">${done}/${total}</div>
+          <div class="ex-count-lbl">sets</div>
+          ${prev?`<div class="ex-prev">${prev}</div>`:''}
+        </div>
+        <button class="graph-btn" onclick="openLiftGraph('${ex.id}','${ex.name}')">Graph</button>
+        <div class="ex-chevron">▾</div>
+      </div>
+    </div>
+    <div class="set-logger">
+      <div class="set-hdr"><div>#</div><div>kg</div><div>Reps</div><div>✓</div></div>
+      <div id="setrows-${ex.id}">
+        ${exLog.sets.map((s,i)=>renderSetRow(ex.id,i,s)).join('')}
+      </div>
+      <div class="set-footer">
+        <button class="btn-add" onclick="addSet('${ex.id}')">+ Set</button>
+        <button class="btn-rem" onclick="remSet('${ex.id}')">− Remove</button>
+      </div>
+      ${prev?`<div class="prev-note">Last time: <span>${prev}</span></div>`:''}
+    </div>
+  </div>`;
+}
+
+function renderSetRow(exId,i,s){
+  const c=s.done?'done':'';
+  return `<div class="set-row" id="sr-${exId}-${i}">
+    <div class="set-n">${i+1}</div>
+    <input class="set-inp ${c}" type="number" inputmode="decimal" placeholder="kg" value="${s.weight}"
+      onchange="updSet('${exId}',${i},'weight',this.value)" id="sw-${exId}-${i}">
+    <input class="set-inp ${c}" type="number" inputmode="numeric" placeholder="reps" value="${s.reps}"
+      onchange="updSet('${exId}',${i},'reps',this.value)" id="sr2-${exId}-${i}">
+    <div class="set-chk ${c}" onclick="togDone('${exId}',${i})" id="sc-${exId}-${i}">✓</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+// INTERACTIONS
+// ══════════════════════════════════════════════
+function setPhase(p){
+  curPhase=p;
+  curWeek=PHASES[p].weeks[0];
+  document.querySelectorAll('.phase-tab').forEach(t=>t.classList.toggle('active',+t.dataset.phase===p));
+  openCards={};
+  save(); render();
+}
+function setWeek(w){curWeek=w;openCards={};save();render()}
+function setSession(sid){alert('setSession called: '+sid);curSession=sid;openCards={};save();render()}
+
+function toggleCard(exId){
+  openCards[exId]=!openCards[exId];
+  const card=document.getElementById('card-'+exId);
+  if(card) card.classList.toggle('open',openCards[exId]);
+}
+
+function updSet(exId,i,field,val){
+  const ex=findEx(exId);
+  if(!ex)return;
+  const log=getExLog(curPhase,curWeek,curSession,ex);
+  log.sets[i][field]=val;
+  save();
+  refreshSetUI(exId,i,log.sets[i]);
+  refreshCount(exId,log);
+}
+
+function togDone(exId,i){
+  const ex=findEx(exId);
+  if(!ex)return;
+  const log=getExLog(curPhase,curWeek,curSession,ex);
+  log.sets[i].done=!log.sets[i].done;
+  save();
+  refreshSetUI(exId,i,log.sets[i]);
+  refreshCount(exId,log);
+}
+
+function refreshSetUI(exId,i,s){
+  const c=s.done?'done':'';
+  const w=document.getElementById(`sw-${exId}-${i}`);
+  const r=document.getElementById(`sr2-${exId}-${i}`);
+  const k=document.getElementById(`sc-${exId}-${i}`);
+  if(w){w.className=`set-inp ${c}`;}
+  if(r){r.className=`set-inp ${c}`;}
+  if(k){k.className=`set-chk ${c}`;}
+}
+
+function refreshCount(exId,log){
+  const card=document.getElementById('card-'+exId);
+  if(!card)return;
+  const el=card.querySelector('.ex-count-num');
+  const done=log.sets.filter(s=>s.done).length;
+  if(el){
+    el.textContent=`${done}/${log.sets.length}`;
+    el.style.color=done===log.sets.length&&done>0?'#4af09a':'#f0f0f0';
+  }
+}
+
+function addSet(exId){
+  const ex=findEx(exId);
+  if(!ex)return;
+  const log=getExLog(curPhase,curWeek,curSession,ex);
+  log.sets.push({weight:'',reps:'',done:false});
+  save();
+  const cont=document.getElementById('setrows-'+exId);
+  if(cont){const i=log.sets.length-1;const d=document.createElement('div');d.innerHTML=renderSetRow(exId,i,log.sets[i]);cont.appendChild(d.firstChild);}
+  refreshCount(exId,log);
+}
+
+function remSet(exId){
+  const ex=findEx(exId);
+  if(!ex)return;
+  const log=getExLog(curPhase,curWeek,curSession,ex);
+  if(log.sets.length<=1)return;
+  log.sets.pop();
+  save();
+  const cont=document.getElementById('setrows-'+exId);
+  if(cont&&cont.lastChild)cont.removeChild(cont.lastChild);
+  refreshCount(exId,log);
+}
+
+function findEx(exId){
+  const s=SESSIONS_BASE[curSession];
+  return s?s.exercises.find(e=>e.id===exId):null;
+}
+
+function getPrev(ex){
+  for(const e of history){
+    if(e.phase===curPhase&&e.sid===curSession&&e.week===curWeek-1){
+      const f=e.exercises.find(x=>x.id===ex.id);
+      if(f&&f.sets.length){
+        const best=f.sets.reduce((a,b)=>(parseFloat(b.weight)||0)>(parseFloat(a.weight)||0)?b:a);
+        if(best.weight)return`${best.weight}kg×${best.reps||'?'}`;
+      }
+    }
+    // also check same week/phase for different sessions
+    if(e.phase===curPhase&&e.sid===curSession&&e.week===curWeek){
+      const f=e.exercises.find(x=>x.id===ex.id);
+      if(f&&f.sets.length){
+        const best=f.sets.reduce((a,b)=>(parseFloat(b.weight)||0)>(parseFloat(a.weight)||0)?b:a);
+        if(best.weight)return`${best.weight}kg×${best.reps||'?'} (this week)`;
+      }
+    }
+  }
+  return '';
+}
+
+function saveWorkout(){
+  const session=SESSIONS_BASE[curSession];
+  const entry={phase:curPhase,week:curWeek,sid:curSession,sessionName:session.name,date:new Date().toISOString(),exercises:[]};
+  session.exercises.forEach(ex=>{
+    const log=logState[stateKey(curPhase,curWeek,curSession,ex.id)];
+    if(!log)return;
+    const done=log.sets.filter(s=>s.done&&(s.weight||s.reps));
+    if(done.length)entry.exercises.push({id:ex.id,name:ex.name,sets:done});
+  });
+  if(entry.exercises.length){
+    history=[entry,...history].slice(0,80);
+    save();
+    showToast('Workout saved ✓');
+  } else {
+    showToast('No completed sets yet');
+  }
+}
+
+function clearSession(){
+  if(!confirm('Clear all logged sets for this session & week?'))return;
+  const session=SESSIONS_BASE[curSession];
+  session.exercises.forEach(ex=>{
+    const k=stateKey(curPhase,curWeek,curSession,ex.id);
+    delete logState[k];
+  });
+  openCards={};
+  save();render();
+  showToast('Session cleared');
+}
+
+// ══════════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════════
+function openHistory(){
+  const body=document.getElementById('histBody');
+  if(!history.length){body.innerHTML='<div class="no-hist">No workouts saved yet</div>';}
+  else{
+    body.innerHTML=history.slice(0,40).map(e=>{
+      const d=new Date(e.date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+      return`<div class="hist-entry">
+        <div class="hist-date">Ph${e.phase} · Wk${e.week} · ${e.sessionName} · ${d}</div>
+        ${e.exercises.map(ex=>`<div class="hist-ex">
+          <div class="hist-ex-name">${ex.name}</div>
+          ${ex.sets.map((s,i)=>`<div class="hist-set"><span>Set ${i+1}</span><span class="v">${s.weight?s.weight+'kg':'—'}</span><span>×</span><span class="v">${s.reps?s.reps+' reps':'—'}</span></div>`).join('')}
+        </div>`).join('')}
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('histModal').classList.add('open');
+}
+function closeHistory(){document.getElementById('histModal').classList.remove('open')}
+function closeHistoryBg(e){if(e.target===document.getElementById('histModal'))closeHistory()}
+
+function openLiftGraph(exId, exName){
+  document.getElementById('graphTitle').textContent = exName + ' Progress';
+  const data = getLiftData(exId);
+  const body = document.getElementById('graphBody');
+  if(data.length < 2){
+    body.innerHTML = '<div class="graph-empty">Need at least 2 workouts with this exercise to show graph</div>';
+  }else{
+    // Build HTML with canvas
+    body.innerHTML = '<canvas id="liftGraphCanvas" class="graph-canvas" style="width:100%;height:160px"></canvas>';
+    const canvas = document.getElementById('liftGraphCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 300;
+    canvas.height = 160;
+    const pad = {l:35, r:10, t:10, b:25};
+    const w = canvas.width - pad.l - pad.r;
+    const h = canvas.height - pad.t - pad.b;
+    const ys = data.map(d => d.v);
+    const minY = Math.min(...ys) * 0.95;
+    const maxY = Math.max(...ys) * 1.05;
+    const range = maxY - minY || 1;
+    // Line
+    ctx.strokeStyle = '#b8f04a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((d, i) => {
+      const x = pad.l + (i / (data.length - 1)) * w;
+      const y = pad.t + h - ((d.v - minY) / range) * h;
+      if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    // Points
+    data.forEach((d, i) => {
+      const x = pad.l + (i / (data.length - 1)) * w;
+      const y = pad.t + h - ((d.v - minY) / range) * h;
+      ctx.fillStyle = '#b8f04a';
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    // Y labels
+    ctx.fillStyle = '#777';
+    ctx.font = '9px "DM Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(maxY.toFixed(0), pad.l - 4, pad.t + 10);
+    ctx.fillText(minY.toFixed(0), pad.l - 4, pad.t + h);
+    // X labels (dates)
+    ctx.textAlign = 'center';
+    data.forEach((d, i) => {
+      if(i % Math.ceil(data.length / 5) === 0 || i === data.length - 1){
+        const x = pad.l + (i / (data.length - 1)) * w;
+        const date = new Date(d.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+        ctx.fillText(date, x, canvas.height - 5);
+      }
+    });
+  }
+  document.getElementById('graphModal').classList.add('open');
+}
+
+function closeGraph(){document.getElementById('graphModal').classList.remove('open')}
+function closeGraphBg(e){if(e.target===document.getElementById('graphModal'))closeGraph()}
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ══════════════════════════════════════════════
+// WEIGHT TRACKING
+// ══════════════════════════════════════════════
+function saveWeight(val){
+  if(!val)return;
+  const w=parseFloat(val);
+  if(isNaN(w))return;
+  const today=new Date().toISOString().split('T')[0];
+  // Remove any entry for today
+  weightLog=weightLog.filter(e=>e.date!==today);
+  weightLog.unshift({date:today,weight:w});
+  weightLog=weightLog.slice(0,200);
+  save();
+}
+
+function getWeightTrend(){
+  if(weightLog.length<2)return'';
+  const curr=weightLog[0].weight;
+  const prev=weightLog[1].weight;
+  if(curr>prev)return'<span class="weight-trend up">↑'+(curr-prev).toFixed(1)+'</span>';
+  if(curr<prev)return'<span class="weight-trend down">↓'+(prev-curr).toFixed(1)+'</span>';
+  return'<span class="weight-trend" style="color:var(--dim)">−</span>';
+}
+
+// ══════════════════════════════════════════════
+// GRAPHS
+// ══════════════════════════════════════════════
+function renderLiftGraph(exId){
+  const data=getLiftData(exId);
+  if(data.length<2)return'<div class="graph-empty">Need more data to graph</div>';
+  const ctx=document.createElement('canvas');
+  ctx.width=300;ctx.height=140;
+  const c=ctx.getContext('2d');
+  const pad={l:30,r:10,t:10,b:20};
+  const w=ctx.width-pad.l-pad.r;
+  const h=ctx.height-pad.t-pad.b;
+  // Auto-scale
+  const ys=data.map(d=>d.v);
+  const minY=Math.min(...ys)*0.95;
+  const maxY=Math.max(...ys)*1.05;
+  const range=maxY-minY||1;
+  // Draw line
+  c.strokeStyle='#f0f0f0';
+  c.lineWidth=2;
+  c.beginPath();
+  data.forEach((d,i)=>{
+    const x=pad.l+(i/(data.length-1))*w;
+    const y=pad.t+h-((d.v-minY)/range)*h;
+    if(i===0)c.moveTo(x,y);else c.lineTo(x,y);
+  });
+  c.stroke();
+  // Draw points
+  data.forEach((d,i)=>{
+    const x=pad.l+(i/(data.length-1))*w;
+    const y=pad.t+h-((d.v-minY)/range)*h;
+    c.fillStyle='#b8f04a';
+    c.beginPath();
+    c.arc(x,y,3,0,Math.PI*2);
+    c.fill();
+  });
+  // Y axis labels
+  c.fillStyle='#777';
+  c.font='9px "DM Mono",monospace';
+  c.textAlign='right';
+  c.fillText(maxY.toFixed(0),pad.l-4,pad.t+10);
+  c.fillText(minY.toFixed(0),pad.l-4,pad.t+h);
+  return`<img class="graph-canvas" src="${ctx.toDataURL()}" style="width:100%;border-radius:4px">`;
+}
+
+function renderWeightGraph(){
+  if(weightLog.length<2)return'<div class="graph-empty">Need more data to graph</div>';
+  const data=weightLog.slice(0,12).reverse();
+  const ctx=document.createElement('canvas');
+  ctx.width=300;ctx.height=140;
+  const c=ctx.getContext('2d');
+  const pad={l:30,r:10,t:10,b:20};
+  const w=ctx.width-pad.l-pad.r;
+  const h=ctx.height-pad.t-pad.b;
+  // Auto-scale
+  const ys=data.map(d=>d.weight);
+  const minY=Math.min(...ys)-0.5;
+  const maxY=Math.max(...ys)+0.5;
+  const range=maxY-minY;
+  // Draw line
+  c.strokeStyle='#f04aff';
+  c.lineWidth=2;
+  c.beginPath();
+  data.forEach((d,i)=>{
+    const x=pad.l+(i/(data.length-1))*w;
+    const y=pad.t+h-((d.weight-minY)/range)*h;
+    if(i===0)c.moveTo(x,y);else c.lineTo(x,y);
+  });
+  c.stroke();
+  // Draw points
+  data.forEach((d,i)=>{
+    const x=pad.l+(i/(data.length-1))*w;
+    const y=pad.t+h-((d.weight-minY)/range)*h;
+    c.fillStyle='#f04aff';
+    c.beginPath();
+    c.arc(x,y,3,0,Math.PI*2);
+    c.fill();
+  });
+  // Y axis labels
+  c.fillStyle='#777';
+  c.font='9px "DM Mono",monospace';
+  c.textAlign='right';
+  c.fillText(maxY.toFixed(1),pad.l-4,pad.t+10);
+  c.fillText(minY.toFixed(1),pad.l-4,pad.t+h);
+  return`<img class="graph-canvas" src="${ctx.toDataURL()}" style="width:100%;border-radius:4px">`;
+}
+
+function getLiftData(exId){
+  // Get best weight×reps from history for this exercise
+  const results=[];
+  history.forEach(e=>{
+    const ex=e.exercises.find(x=>x.id===exId);
+    if(ex&&ex.sets.length){
+      const best=ex.sets.reduce((a,b)=>{
+        const va=(parseFloat(b.weight)||0)*(parseFloat(b.reps)||0);
+        const vb=(parseFloat(a.weight)||0)*(parseFloat(a.reps)||0);
+        return vb>va?b:a;
+      });
+      if(best.weight){
+        results.push({
+          date:e.date,
+          v:(parseFloat(best.weight)||0)*(parseFloat(best.reps)||0)
+        });
+      }
+    }
+  });
+  return results.slice(0,12);
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+load();
+render();
+</script>
+</body>
+</html>
